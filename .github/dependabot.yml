@@ -1,0 +1,88 @@
+# Dependabot configuration for Turborepo monorepo
+# Manages dependencies across all packages and apps
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Root package.json (workspace dependencies)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "turborepo"
+    groups:
+      development-dependencies:
+        dependency-type: "development"
+        patterns:
+          - "@types/*"
+          - "eslint*"
+          - "prettier*"
+          - "typescript*"
+          - "vite*"
+          - "vitest*"
+          - "biome*"
+      build-tools:
+        patterns:
+          - "turbo*"
+          - "rollup*"
+          - "webpack*"
+          - "esbuild*"
+      ui-frameworks:
+        patterns:
+          - "react*"
+          - "@radix-ui/*"
+          - "tailwindcss*"
+          - "lucide-react"
+
+  # Apps directory - scan for individual app dependencies
+  - package-ecosystem: "npm"
+    directory: "/apps"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps(apps)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "apps"
+
+  # Packages directory - scan for shared package dependencies
+  - package-ecosystem: "npm"
+    directory: "/packages"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps(packages)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "packages"
+
+  # GitHub Actions workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "github-actions"
+      - "ci/cd"

@@ -1,0 +1,100 @@
+# ----------------------
+#  Next.js App Dockerfile for Turborepo
+#  Usage: docker build -f Dockerfile.nextjs --build-arg APP_NAME=landing .
+# ----------------------
+
+ARG APP_NAME=landing
+
+# ----------------------
+#  Dependencies stage
+# ----------------------
+FROM node:22-alpine AS deps
+
+WORKDIR /app
+
+# Install pnpm globally
+RUN npm install -g pnpm@10.14.0
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S worker -u 1001
+
+# Copy package files for dependency resolution
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY turbo.json biome.json ./
+
+# Copy package.json files from all workspaces
+COPY packages/*/package.json ./packages/*/
+COPY apps/*/package.json ./apps/*/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# ----------------------
+#  Build stage
+# ----------------------
+FROM node:22-alpine AS builder
+
+ARG APP_NAME
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm@10.14.0
+
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/package.json ./package.json
+COPY --from=deps /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=deps /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=deps /app/turbo.json ./turbo.json
+
+# Copy source code
+COPY packages ./packages
+COPY apps ./apps
+
+# Build the specific app and its dependencies
+RUN pnpm turbo build --filter=${APP_NAME}
+
+# ----------------------
+#  Runtime stage
+# ----------------------
+FROM node:22-alpine AS runtime
+
+ARG APP_NAME
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Install pnpm
+RUN npm install -g pnpm@10.14.0
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
+# Copy package files
+COPY package.json pnpm-workspace.yaml ./
+COPY --from=builder /app/turbo.json ./turbo.json
+
+# Install production dependencies
+RUN pnpm install --prod --frozen-lockfile
+
+# Copy built packages
+COPY --from=builder /app/packages/*/dist ./packages/*/dist/
+COPY --from=builder /app/packages/*/package.json ./packages/*/
+
+# Copy built Next.js app
+COPY --from=builder /app/apps/${APP_NAME}/.next/standalone ./
+COPY --from=builder /app/apps/${APP_NAME}/.next/static ./apps/${APP_NAME}/.next/static
+COPY --from=builder /app/apps/${APP_NAME}/public ./apps/${APP_NAME}/public
+
+# Health check for Next.js app
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
+
+EXPOSE 3000
+
+USER nextjs
+
+CMD ["node", "apps/${APP_NAME}/server.js"]

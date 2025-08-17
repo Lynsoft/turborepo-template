@@ -1,0 +1,48 @@
+name: Cache Cleanup
+
+on:
+  schedule:
+    # Run weekly on Sundays at 3 AM UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    name: Cleanup Old Caches
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cleanup old caches
+        run: |
+          echo "🧹 Cleaning up old GitHub Actions caches..."
+          
+          # Get list of caches
+          gh api repos/${{ github.repository }}/actions/caches \
+            --jq '.actions_caches[] | select(.created_at < (now - 604800)) | .id' \
+            > cache_ids.txt
+          
+          # Delete old caches (older than 7 days)
+          if [ -s cache_ids.txt ]; then
+            echo "Found $(wc -l < cache_ids.txt) old caches to delete"
+            while read cache_id; do
+              echo "Deleting cache $cache_id"
+              gh api repos/${{ github.repository }}/actions/caches/$cache_id -X DELETE || true
+            done < cache_ids.txt
+          else
+            echo "No old caches found"
+          fi
+          
+          rm -f cache_ids.txt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "✅ Cache cleanup completed"
+          echo "Old caches have been removed to free up storage space"

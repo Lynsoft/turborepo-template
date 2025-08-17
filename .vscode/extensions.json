@@ -1,0 +1,32 @@
+{
+  "recommendations": [
+    // Essential for this stack
+    "biomejs.biome",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+    
+    // React/JSX support
+    "ms-vscode.vscode-react-javascript",
+    
+    // Git integration
+    "eamodio.gitlens",
+    
+    // Utilities
+    "christian-kohler.path-intellisense",
+    "bradlc.vscode-tailwindcss",
+    "formulahendry.auto-rename-tag",
+    "ms-vscode.vscode-json",
+    
+    // Monorepo support
+    "ms-vscode.vscode-workspace-trust",
+    
+    // Optional but helpful
+    "usernamehw.errorlens",
+    "gruntfuggly.todo-tree",
+    "ms-vscode.vscode-github-issue-notebooks"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.vscode-eslint",
+    "esbenp.prettier-vscode"
+  ]
+}
