@@ -1,0 +1,124 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - beta
+      - alpha
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify code quality
+        run: |
+          pnpm check
+          pnpm check-types
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Create distribution directory
+        run: mkdir -p dist
+
+      - name: Package build artifacts
+        run: |
+          if [ -d "apps" ] && [ "$(ls -A apps)" ]; then
+            for app in apps/*/; do
+              if [ -d "$app" ]; then
+                app_name=$(basename "$app")
+                if [ -d "$app/dist" ]; then
+                  tar -czf "dist/${app_name}-dist.tgz" -C "$app" dist/
+                elif [ -d "$app/.next" ]; then
+                  tar -czf "dist/${app_name}-next.tgz" -C "$app" .next/
+                fi
+              fi
+            done
+          fi
+
+          if [ -d "packages" ] && [ "$(ls -A packages)" ]; then
+            for pkg in packages/*/; do
+              if [ -d "$pkg" ]; then
+                pkg_name=$(basename "$pkg")
+                if [ -d "$pkg/dist" ]; then
+                  tar -czf "dist/${pkg_name}-dist.tgz" -C "$pkg" dist/
+                fi
+              fi
+            done
+          fi
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm release
+
+  # Job to notify on release completion
+  notify:
+    name: Notify Release
+    runs-on: ubuntu-latest
+    needs: release
+    if: always()
+
+    steps:
+      - name: Notify success
+        if: needs.release.result == 'success'
+        run: |
+          echo "✅ Release completed successfully!"
+          echo "Check the releases page for the new version."
+
+      - name: Notify failure
+        if: needs.release.result == 'failure'
+        run: |
+          echo "❌ Release failed!"
+          echo "Check the workflow logs for details."

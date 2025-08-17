@@ -1,0 +1,101 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+.next/
+.turbo/
+dist/
+build/
+out/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Development files
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# Temporary files
+tmp/
+temp/
+
+# Package manager files (keep lock files for reproducible builds)
+.npm/
+.yarn/
+.pnpm-store/
+
+# Turborepo cache
+.turbo/
+
+# Biome cache
+.biome/
+
+# Lefthook
+.lefthook/
+.lefthook-local/
+
+# GitHub
+.github/
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Makefile and scripts
+Makefile
+scripts/
+
+# Config files that aren't needed in container
+renovate.json
+.nvmrc
+.node-version
+lefthook.yml
+commitlint.config.js

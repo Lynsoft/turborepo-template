@@ -1,0 +1,57 @@
+{
+  "name": "holeswing",
+  "private": true,
+  "packageManager": "pnpm@10.14.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/YOUR_REPO.git"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
+    "lint:fix": "biome lint --write .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "check-types": "turbo run check-types",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "gen": "turbo gen",
+    "gen:app": "turbo gen workspace --type app",
+    "gen:package": "turbo gen workspace --type package",
+    "hooks:install": "lefthook install",
+    "hooks:uninstall": "lefthook uninstall",
+    "hooks:run": "lefthook run",
+    "hooks:test": "lefthook run pre-commit",
+    "commitlint": "commitlint",
+    "commit": "git-cz",
+    "release": "semantic-release",
+    "release:dry": "semantic-release --dry-run"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.0",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.4",
+    "@semantic-release/npm": "^12.0.2",
+    "@turbo/gen": "^2.5.6",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "lefthook": "^1.12.3",
+    "semantic-release": "^24.2.7",
+    "turbo": "^2.5.6",
+    "typescript": "5.9.2"
+  }
+}
