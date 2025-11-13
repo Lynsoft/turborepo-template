@@ -5,11 +5,22 @@
     "clientKind": "git",
     "useIgnoreFile": true
   },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
   "files": {
     "includes": [
       "apps/**/*.{js,jsx,ts,tsx,json,jsonc}",
       "packages/**/*.{js,jsx,ts,tsx,json,jsonc}",
-      "*.{js,jsx,ts,tsx,json,jsonc}"
+      "*.{js,jsx,ts,tsx,json,jsonc}",
+      "!dist",
+      "!.vscode",
+      "!.git",
+      "!.cursor"
     ]
   },
   "linter": {
@@ -34,8 +45,17 @@
         "useSortedClasses": {
           "level": "warn",
           "options": {
-            "attributes": ["className", "class"],
-            "functions": ["clsx", "cva", "tw", "cn", "classNames"]
+            "attributes": [
+              "className",
+              "class"
+            ],
+            "functions": [
+              "clsx",
+              "cva",
+              "tw",
+              "cn",
+              "classNames"
+            ]
           }
         }
       },
@@ -65,7 +85,7 @@
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
-    "lineWidth": 80,
+    "lineWidth": 100,
     "attributePosition": "auto"
   },
   "javascript": {
@@ -83,7 +103,10 @@
       "quoteStyle": "double",
       "attributePosition": "auto"
     },
-    "globals": ["React", "JSX"]
+    "globals": [
+      "React",
+      "JSX"
+    ]
   },
   "json": {
     "formatter": {
@@ -101,7 +124,9 @@
   },
   "overrides": [
     {
-      "includes": ["**/*.config.{js,ts,mjs,cjs}"],
+      "includes": [
+        "**/*.config.{js,ts,mjs,cjs}"
+      ],
       "linter": {
         "rules": {
           "style": {
@@ -111,7 +136,9 @@
       }
     },
     {
-      "includes": ["**/tailwind.config.{js,ts}"],
+      "includes": [
+        "**/tailwind.config.{js,ts}"
+      ],
       "linter": {
         "rules": {
           "suspicious": {
@@ -121,7 +148,9 @@
       }
     },
     {
-      "includes": ["**/*.d.ts"],
+      "includes": [
+        "**/*.d.ts"
+      ],
       "linter": {
         "rules": {
           "style": {
